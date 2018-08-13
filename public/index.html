@@ -147,7 +147,14 @@
       </div>
     </div>
   </div>
-    <script type="text/javascript" src="jquery/dist/jquery.min.js"></script>
+
+  <script id="post-template" type="text/x-handlebars-template">
+    {{#each cart}}
+        <div class="cart-item" data-name="{{name}}" data-price="{{price}}">{{name}} - ${{price}}</div>
+    {{/each}}
+  </script>
+
+  <script type="text/javascript" src="jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="handlebars/dist/handlebars.min.js"></script>
   <script type="text/javascript" src="script.js"></script>
