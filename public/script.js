@@ -24,7 +24,7 @@ var ShoppingCart = function () {
     // TODO: Write this function. Remember this function has nothing to do with display. 
     // It simply is for adding an item to the cart array, no HTML involved - honest ;-)
     cart.push(item);
-
+    total = 0;
     for (let i = 0; i < cart.length; i++) {
       var itemPrice = cart[i].price;
       total += itemPrice;
