@@ -1,11 +1,19 @@
 var ShoppingCart = function () {
   var source = $('#post-template').html();
   var template = Handlebars.compile(source);
-
+  var STORAGE_ID = 'ShoppingCart';
   // an array with all of our cart items
   var cart = [];
   var total = 0;
   var $cart = $('.cart-list');
+
+  var saveToLocalStorage = function () {
+    localStorage.setItem(STORAGE_ID, JSON.stringify(cart));
+  };
+
+  var getFromLocalStorage = function () {
+    return JSON.parse(localStorage.getItem(STORAGE_ID) || '[]');
+  };
 
   var updateCart = function () {
     // TODO: Write this function. In this function we render the page.
@@ -42,7 +50,8 @@ var ShoppingCart = function () {
     updateCart: updateCart,
     addItem: addItem,
     clearCart: clearCart,
-    cart
+    saveToLocalStorage: saveToLocalStorage,
+    getFromLocalStorage: getFromLocalStorage,
   }
 };
 
@@ -50,8 +59,8 @@ var app = ShoppingCart();
 
 // update the cart as soon as the page loads!
 app.updateCart();
-
-
+app.saveToLocalStorage();
+app.getFromLocalStorage();
 //--------EVENTS---------
 
 $('.view-cart').on('click', function () {
@@ -65,11 +74,15 @@ $('.add-to-cart').on('click' , function () {
   var item = findCardItem($clickedCard);
   app.addItem(item);
   app.updateCart();
+  app.saveToLocalStorage();
+  app.getFromLocalStorage();
 });
 
 $('.clear-cart').on('click', function () {
   app.clearCart();
   app.updateCart();
+  app.saveToLocalStorage();
+  app.getFromLocalStorage();
 });
 
 var findCardItem = function($clickedCard) {
