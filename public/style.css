@@ -108,3 +108,18 @@ body {
   padding-top: 2px;
   padding-bottom: 2px;
 }
+
+.add-item-form {
+  position: fixed;
+  top: 55px;
+  right: 40px;
+  display: none;
+  background-color: #fff;
+  box-shadow: 2px 2px 2px #B3B3B3;
+  padding: 15px;
+  z-index: 999;
+}
+
+.add-item {
+  width: 100%;
+}
