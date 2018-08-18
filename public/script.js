@@ -8,9 +8,7 @@ var ShoppingCart = function () {
   var $cart = $('.cart-list');
 
   var updateCart = function () {
-    // TODO: Write this function. In this function we render the page.
-    // Meaning we make sure that all our cart items are displayed in the browser.
-    // Remember to empty the "cart div" before you re-add all the item elements.
+
     $cart.empty();
 
     var newHTML = template({cart});
@@ -21,29 +19,63 @@ var ShoppingCart = function () {
 
 
   var addItem = function (item) {
-    // TODO: Write this function. Remember this function has nothing to do with display. 
-    // It simply is for adding an item to the cart array, no HTML involved - honest ;-)
-    cart.push(item);
-    total = 0;
-    for (let i = 0; i < cart.length; i++) {
-      var itemPrice = cart[i].price;
+    let cart_item = _findItem(item);
+    if ( cart_item === null ) {
+      cart.push(item);
+      var itemPrice = item.price;
       total += itemPrice;
+      item.quant = 1;
+    } else {
+      let singleItemPrice = cart_item.price / cart_item.quant;
+      total += singleItemPrice;
+      cart_item.price += singleItemPrice;
+      cart_item.quant ++;
     }
-    
+  };
+
+  var _findItem = function (item) {
+    for (let i = 0; i < cart.length; i += 1) {
+      if (cart[i].name === item.name) {
+        return cart[i];
+      }
+    }
+    return null;   
+  };
+
+  var _findItemByName = function (itemName) {
+    for (let index = 0; index < cart.length; index += 1) {
+      if (cart[index].name === itemName) {
+        return cart[index];
+      }
+    }   
   };
 
   var clearCart = function () {
     // TODO: Write a function that clears the cart ;-)
     cart = [];
     total = 0;
-  }
-  
+  };
+
+  var removeItem = function (itemName) {
+    var item = _findItemByName(itemName);
+    if (item.quant === 1) {
+      total -= item.price;
+      cart.splice(cart.indexOf(item), 1);
+    } else {
+      let singleItemPrice = item.price / item.quant;
+      total -= singleItemPrice;
+      item.price -= singleItemPrice;
+      item.quant -= 1;
+    }
+  };
+
   return {
     updateCart: updateCart,
     addItem: addItem,
     clearCart: clearCart,
+    removeItem: removeItem,
     cart
-  }
+  };
 };
 
 var app = ShoppingCart();
@@ -67,14 +99,21 @@ $('.add-to-cart').on('click' , function () {
   app.updateCart();
 });
 
-$('.clear-cart').on('click', function () {
-  app.clearCart();
-  app.updateCart();
-});
-
 var findCardItem = function($clickedCard) {
   var $itemName = $clickedCard.data("name");
   var $itemPrice = $clickedCard.data("price");
   var item = {name: $itemName, price: $itemPrice};
   return item;
 };
+
+$('.clear-cart').on('click', function () {
+  app.clearCart();
+  app.updateCart();
+});
+
+$('.cart-list').on('click', '.remove', function () {
+  var $clickedItem = $(this).closest('.cart-item');
+  var itemName = $clickedItem.data("name");
+  app.removeItem(itemName);
+  app.updateCart();
+});
