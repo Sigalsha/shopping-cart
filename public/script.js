@@ -2,7 +2,6 @@ var ShoppingCart = function () {
   var source = $('#post-template').html();
   var template = Handlebars.compile(source);
   var STORAGE_ID = 'ShoppingCart';
-  // an array with all of our cart items
   var cart = [];
   var total = 0;
   var $cart = $('.cart-list');
@@ -15,10 +14,18 @@ var ShoppingCart = function () {
     return JSON.parse(localStorage.getItem(STORAGE_ID) || '[]');
   };
 
+  var addLocalStorageToTotal = function () {
+    for (var i in cart) {
+      total += cart[i].price;
+    }
+  };
+
+  var addLocalStorageToCart = function() {
+    cart = getFromLocalStorage();
+    addLocalStorageToTotal();
+  }
+
   var updateCart = function () {
-    // TODO: Write this function. In this function we render the page.
-    // Meaning we make sure that all our cart items are displayed in the browser.
-    // Remember to empty the "cart div" before you re-add all the item elements.
     $cart.empty();
 
     var newHTML = template({cart});
@@ -29,42 +36,79 @@ var ShoppingCart = function () {
 
 
   var addItem = function (item) {
-    // TODO: Write this function. Remember this function has nothing to do with display. 
-    // It simply is for adding an item to the cart array, no HTML involved - honest ;-)
-    cart.push(item);
-    total = 0;
-    for (let i = 0; i < cart.length; i++) {
-      var itemPrice = cart[i].price;
+    let cart_item = _findItem(item);
+    if ( cart_item === null ) {
+      cart.push(item);
+      var itemPrice = item.price;
       total += itemPrice;
+      item.quant = 1;
+    } else {
+      let singleItemPrice = cart_item.price / cart_item.quant;
+      total += singleItemPrice;
+      cart_item.price += singleItemPrice;
+      cart_item.quant ++;
+    } 
+    saveToLocalStorage();
+  };
+
+  var _findItem = function (item) {
+    for (let i = 0; i < cart.length; i += 1) {
+      if (cart[i].name === item.name) {
+        return cart[i];
+      }
     }
-    
+    return null;   
+  };
+
+  var _findItemByName = function (itemName) {
+    for (let index = 0; index < cart.length; index += 1) {
+      if (cart[index].name === itemName) {
+        return cart[index];
+      }
+    }   
   };
 
   var clearCart = function () {
-    // TODO: Write a function that clears the cart ;-)
     cart = [];
     total = 0;
+    saveToLocalStorage();
   }
+
+  var removeItem = function (itemName) {
+    let cartItem = _findItemByName(itemName);
+    if (cartItem.quant === 1) {
+      total -= cartItem.price;
+      cart.splice(cart.indexOf(cartItem), 1);
+      saveToLocalStorage();
+    } else {
+      let singleItemPrice = cartItem.price / cartItem.quant;
+      total -= singleItemPrice;
+      cartItem.price -= singleItemPrice;
+      cartItem.quant -= 1;
+      saveToLocalStorage();
+    }
+  };
   
   return {
     updateCart: updateCart,
     addItem: addItem,
     clearCart: clearCart,
+    removeItem: removeItem,
     saveToLocalStorage: saveToLocalStorage,
     getFromLocalStorage: getFromLocalStorage,
+    addLocalStorageToCart: addLocalStorageToCart,
+    addLocalStorageToTotal: addLocalStorageToTotal
   }
 };
 
 var app = ShoppingCart();
-
+app.addLocalStorageToCart();
 // update the cart as soon as the page loads!
 app.updateCart();
-app.saveToLocalStorage();
-app.getFromLocalStorage();
+
 //--------EVENTS---------
 
 $('.view-cart').on('click', function () {
-  // TODO: hide/show the shopping cart!
   $('.shopping-cart').toggle();
 });
 
@@ -74,15 +118,6 @@ $('.add-to-cart').on('click' , function () {
   var item = findCardItem($clickedCard);
   app.addItem(item);
   app.updateCart();
-  app.saveToLocalStorage();
-  app.getFromLocalStorage();
-});
-
-$('.clear-cart').on('click', function () {
-  app.clearCart();
-  app.updateCart();
-  app.saveToLocalStorage();
-  app.getFromLocalStorage();
 });
 
 var findCardItem = function($clickedCard) {
@@ -91,3 +126,16 @@ var findCardItem = function($clickedCard) {
   var item = {name: $itemName, price: $itemPrice};
   return item;
 };
+
+$('.clear-cart').on('click', function () {
+  app.clearCart();
+  app.updateCart();
+});
+
+$('.cart-list').on('click', '.remove', function () {
+  var $clickedItem = $(this).closest('.item');
+  var itemName = $clickedItem.data("name");
+  app.removeItem(itemName);
+  app.updateCart();
+});
+

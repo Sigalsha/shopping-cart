@@ -150,7 +150,11 @@
 
   <script id="post-template" type="text/x-handlebars-template">
     {{#each cart}}
-        <div class="cart-item" data-name="{{name}}" data-price="{{price}}">{{name}} - ${{price}}</div>
+      {{#if quant}}
+        <div class="cart item" data-name="{{name}}" data-price="{{price}}">{{name}} ( {{quant}} ) - {{price}} <button class="remove">remove</button></div>
+      {{else}}
+        <div class="cart item" data-name="{{name}}" data-price="{{price}}">{{name}} - {{price}} <button class="remove">remove</button></div>
+      {{/if}}  
     {{/each}}
   </script>
 
